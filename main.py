@@ -10,32 +10,24 @@ class Fractal:
         self.deg=deg
         self.verts=[]
 
-    def rotate_point(self,ox,oy,x,y):
-        pxx = math.cos(self.deg*self.n) * (x-ox) - math.sin(self.deg*self.n) * (y-oy) + ox
-        pyy = math.sin(self.deg*self.n) * (x-ox) + math.cos(self.deg*self.n) * (y-oy) + oy
-        return (pxx,pyy);
-
-    def rotate_point2(self,ox,oy,x,y):
-        pxx = math.cos(-1*self.deg*self.n) * (x-ox) - math.sin(-1*self.deg*self.n) * (y-oy) + ox
-        pyy = math.sin(-1*self.deg*self.n) * (x-ox) + math.cos(-1*self.deg*self.n) * (y-oy) + oy
-        return (pxx,pyy);
-
     def draw_line(self,ctx):
         ctx.set_line_width(math.log2(self.stroke)*2)
         l=[]
-        N=100-math.log2(self.stroke)*0.5
+        N=100
         for x,y in self.verts:
+            ctx.set_source_rgb(0, 1, 0)
             ctx.move_to(x,y)
-            xx= x-N*math.sin(self.deg*self.n)
-            yy= y+N*math.cos(self.deg*self.n)
-            ctx.line_to(*self.rotate_point(x,y,xx,yy))
-            l.append(self.rotate_point(x,y,xx,yy))
-            
+            xx,yy= x-100*math.sin(-195*self.n),y+100*math.cos(-195*self.n)
+            ctx.line_to(xx,yy)
+            l.append((xx,yy))
+            ctx.stroke()
+
+            ctx.set_source_rgb(1, 0, 0)
             ctx.move_to(x,y)
-            xx= x+N*math.sin(self.deg*self.n)
-            yy= y+N*math.cos(self.deg*self.n)
-            ctx.line_to(*self.rotate_point2(x,y,xx,yy))
-            l.append(self.rotate_point2(x,y,xx,yy))
+            xx,yy= x+100*math.sin(-195*self.n),y+100*math.cos(-195*self.n)
+            ctx.line_to(xx,yy)
+            l.append((xx,yy))
+            ctx.stroke()
 
         self.verts.clear()
         self.verts=list(set(l))
@@ -49,7 +41,10 @@ class Fractal:
         ctx.paint()
         ctx.set_source_rgb(0, 0, 0)
         ctx.set_line_cap(cairo.LINE_CAP_ROUND)
-        self.verts=[(PIC_SIZE*2,0)]
+        ctx.move_to(PIC_SIZE*2,PIC_SIZE*2)
+        ctx.line_to(PIC_SIZE*2,PIC_SIZE*2+200)
+        self.verts=[(PIC_SIZE*2,PIC_SIZE*2+200)]
+
         while self.stroke!=0:
             self.draw_line(ctx)
             self.stroke//=2
@@ -57,5 +52,5 @@ class Fractal:
 
         surface.write_to_png("out.png")
 
-f=Fractal(0,2**10,25)
+f=Fractal(0,2**10,10)
 f.draw()
