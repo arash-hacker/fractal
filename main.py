@@ -9,9 +9,15 @@ class Fractal:
         self.n=n
         self.deg=deg
         self.verts=[]
+
     def rotate_point(self,ox,oy,x,y):
         pxx = math.cos(self.deg*self.n) * (x-ox) - math.sin(self.deg*self.n) * (y-oy) + ox
         pyy = math.sin(self.deg*self.n) * (x-ox) + math.cos(self.deg*self.n) * (y-oy) + oy
+        return (pxx,pyy);
+
+    def rotate_point2(self,ox,oy,x,y):
+        pxx = math.cos(-1*self.deg*self.n) * (x-ox) - math.sin(-1*self.deg*self.n) * (y-oy) + ox
+        pyy = math.sin(-1*self.deg*self.n) * (x-ox) + math.cos(-1*self.deg*self.n) * (y-oy) + oy
         return (pxx,pyy);
 
     def draw_line(self,ctx):
@@ -22,14 +28,14 @@ class Fractal:
             ctx.move_to(x,y)
             xx= x-N*math.sin(self.deg*self.n)
             yy= y+N*math.cos(self.deg*self.n)
-            ctx.line_to(xx,yy)
-            l.append((xx,yy))
+            ctx.line_to(*self.rotate_point(x,y,xx,yy))
+            l.append(self.rotate_point(x,y,xx,yy))
             
             ctx.move_to(x,y)
             xx= x+N*math.sin(self.deg*self.n)
             yy= y+N*math.cos(self.deg*self.n)
-            ctx.line_to(xx,yy)
-            l.append((xx,yy))
+            ctx.line_to(*self.rotate_point2(x,y,xx,yy))
+            l.append(self.rotate_point2(x,y,xx,yy))
 
         self.verts.clear()
         self.verts=list(set(l))
@@ -37,13 +43,13 @@ class Fractal:
         ctx.stroke()
 
     def draw(self):
-        surface = cairo.ImageSurface(cairo.FORMAT_RGB24, PIC_SIZE*2, PIC_SIZE*2)
+        surface = cairo.ImageSurface(cairo.FORMAT_RGB24, PIC_SIZE*4, PIC_SIZE*4)
         ctx = cairo.Context(surface)
         ctx.set_source_rgb(1, 1, 1)
         ctx.paint()
         ctx.set_source_rgb(0, 0, 0)
         ctx.set_line_cap(cairo.LINE_CAP_ROUND)
-        self.verts=[(PIC_SIZE,0)]
+        self.verts=[(PIC_SIZE*2,0)]
         while self.stroke!=0:
             self.draw_line(ctx)
             self.stroke//=2
@@ -51,5 +57,5 @@ class Fractal:
 
         surface.write_to_png("out.png")
 
-f=Fractal(0,2**9,25)
+f=Fractal(0,2**10,25)
 f.draw()
